@@ -54,150 +54,57 @@ class Camellia:
 
         # Шифрование происходит по схеме Фейстеля с 18 этапами для 128 - битного ключа и 24 этапами для 192 - и
         # 256 - битных ключей. Каждые 6 этапов применяются функции FL и FLINV.
-        if self._key_size == 16:
-            D1 = block >> 64  # Шифруемое сообщение делится на две 64 - битные части
-            D2 = block & MASK64
-            D1 = D1 ^ self._kw[0]  # Предварительное забеливание
-            D2 = D2 ^ self._kw[1]
-            D2 = D2 ^ self.F(D1, self._k[0])
-            D1 = D1 ^ self.F(D2, self._k[1])
-            D2 = D2 ^ self.F(D1, self._k[2])
-            D1 = D1 ^ self.F(D2, self._k[3])
-            D2 = D2 ^ self.F(D1, self._k[4])
-            D1 = D1 ^ self.F(D2, self._k[5])
-            D1 = self.FL(D1, self._ke[0])  # FL
-            D2 = self.FLINV(D2, self._ke[1])  # FLINV
-            D2 = D2 ^ self.F(D1, self._k[6])
-            D1 = D1 ^ self.F(D2, self._k[7])
-            D2 = D2 ^ self.F(D1, self._k[8])
-            D1 = D1 ^ self.F(D2, self._k[9])
-            D2 = D2 ^ self.F(D1, self._k[10])
-            D1 = D1 ^ self.F(D2, self._k[11])
-            D1 = self.FL(D1, self._ke[2])  # FL
-            D2 = self.FLINV(D2, self._ke[3])  # FLINV
-            D2 = D2 ^ self.F(D1, self._k[12])
-            D1 = D1 ^ self.F(D2, self._k[13])
-            D2 = D2 ^ self.F(D1, self._k[14])
-            D1 = D1 ^ self.F(D2, self._k[15])
-            D2 = D2 ^ self.F(D1, self._k[16])
-            D1 = D1 ^ self.F(D2, self._k[17])
-            D2 = D2 ^ self._kw[2]  # Финальное забеливание
-            D1 = D1 ^ self._kw[3]
-            C = (D2 << 64) | D1
-        else:
-            D1 = block >> 64  # Шифруемое сообщение делится на две 64-битные части
-            D2 = block & MASK64
-            D1 = D1 ^ self._kw[0]  # Предварительное забеливание
-            D2 = D2 ^ self._kw[1]
-            D2 = D2 ^ self.F(D1, self._k[0])
-            D1 = D1 ^ self.F(D2, self._k[1])
-            D2 = D2 ^ self.F(D1, self._k[2])
-            D1 = D1 ^ self.F(D2, self._k[3])
-            D2 = D2 ^ self.F(D1, self._k[4])
-            D1 = D1 ^ self.F(D2, self._k[5])
-            D1 = self.FL(D1, self._ke[0])  # FL
-            D2 = self.FLINV(D2, self._ke[1])  # FLINV
-            D2 = D2 ^ self.F(D1, self._k[6])
-            D1 = D1 ^ self.F(D2, self._k[7])
-            D2 = D2 ^ self.F(D1, self._k[8])
-            D1 = D1 ^ self.F(D2, self._k[9])
-            D2 = D2 ^ self.F(D1, self._k[10])
-            D1 = D1 ^ self.F(D2, self._k[11])
-            D1 = self.FL(D1, self._ke[2])  # FL
-            D2 = self.FLINV(D2, self._ke[3])  # FLINV
-            D2 = D2 ^ self.F(D1, self._k[12])
-            D1 = D1 ^ self.F(D2, self._k[13])
-            D2 = D2 ^ self.F(D1, self._k[14])
-            D1 = D1 ^ self.F(D2, self._k[15])
-            D2 = D2 ^ self.F(D1, self._k[16])
-            D1 = D1 ^ self.F(D2, self._k[17])
-            D1 = self.FL(D1, self._ke[4])  # FL
-            D2 = self.FLINV(D2, self._ke[5])  # FLINV
-            D2 = D2 ^ self.F(D1, self._k[18])
-            D1 = D1 ^ self.F(D2, self._k[19])
-            D2 = D2 ^ self.F(D1, self._k[20])
-            D1 = D1 ^ self.F(D2, self._k[21])
-            D2 = D2 ^ self.F(D1, self._k[22])
-            D1 = D1 ^ self.F(D2, self._k[23])
-            D2 = D2 ^ self._kw[2]  # Финальное забеливание
-            D1 = D1 ^ self._kw[3]
-            C = (D2 << 64) | D1
 
-        return C.to_bytes(self._key_size, byteorder='little')
+        D1 = block >> 64  # Шифруемое сообщение делится на две 64 - битные части
+        D2 = block & MASK64
 
-    def decode_block(self, block):
-        block = int.from_bytes(block, byteorder='little')
+        D1 = D1 ^ self._kw[0] & MASK64  # Предварительное забеливание
+        D2 = D2 ^ self._kw[1] & MASK64
 
-        if self._key_size == 16:
-            D1 = block >> 64  # Шифруемое сообщение делится на две 64 - битные части
-            D2 = block & MASK64
-            D1 = D1 ^ self._kw[0]  # Предварительное забеливание
-            D2 = D2 ^ self._kw[1]
-            D2 = D2 ^ self.F(D1, self._k[0])
-            D1 = D1 ^ self.F(D2, self._k[1])
-            D2 = D2 ^ self.F(D1, self._k[2])
-            D1 = D1 ^ self.F(D2, self._k[3])
-            D2 = D2 ^ self.F(D1, self._k[4])
-            D1 = D1 ^ self.F(D2, self._k[5])
-            D1 = self.FL(D1, self._ke[0])  # FL
-            D2 = self.FLINV(D2, self._ke[1])  # FLINV
-            D2 = D2 ^ self.F(D1, self._k[6])
-            D1 = D1 ^ self.F(D2, self._k[7])
-            D2 = D2 ^ self.F(D1, self._k[8])
-            D1 = D1 ^ self.F(D2, self._k[9])
-            D2 = D2 ^ self.F(D1, self._k[10])
-            D1 = D1 ^ self.F(D2, self._k[11])
-            D1 = self.FL(D1, self._ke[2])  # FL
-            D2 = self.FLINV(D2, self._ke[3])  # FLINV
-            D2 = D2 ^ self.F(D1, self._k[12])
-            D1 = D1 ^ self.F(D2, self._k[13])
-            D2 = D2 ^ self.F(D1, self._k[14])
-            D1 = D1 ^ self.F(D2, self._k[15])
-            D2 = D2 ^ self.F(D1, self._k[16])
-            D1 = D1 ^ self.F(D2, self._k[17])
-            D2 = D2 ^ self._kw[2]  # Финальное забеливание
-            D1 = D1 ^ self._kw[3]
-            C = (D2 << 64) | D1
-        else:
-            D1 = block >> 64  # Шифруемое сообщение делится на две 64-битные части
-            D2 = block & MASK64
-            D1 = D1 ^ self._kw[0]  # Предварительное забеливание
-            D2 = D2 ^ self._kw[1]
-            D2 = D2 ^ self.F(D1, self._k[0])
-            D1 = D1 ^ self.F(D2, self._k[1])
-            D2 = D2 ^ self.F(D1, self._k[2])
-            D1 = D1 ^ self.F(D2, self._k[3])
-            D2 = D2 ^ self.F(D1, self._k[4])
-            D1 = D1 ^ self.F(D2, self._k[5])
-            D1 = self.FL(D1, self._ke[0])  # FL
-            D2 = self.FLINV(D2, self._ke[1])  # FLINV
-            D2 = D2 ^ self.F(D1, self._k[6])
-            D1 = D1 ^ self.F(D2, self._k[7])
-            D2 = D2 ^ self.F(D1, self._k[8])
-            D1 = D1 ^ self.F(D2, self._k[9])
-            D2 = D2 ^ self.F(D1, self._k[10])
-            D1 = D1 ^ self.F(D2, self._k[11])
-            D1 = self.FL(D1, self._ke[2])  # FL
-            D2 = self.FLINV(D2, self._ke[3])  # FLINV
-            D2 = D2 ^ self.F(D1, self._k[12])
-            D1 = D1 ^ self.F(D2, self._k[13])
-            D2 = D2 ^ self.F(D1, self._k[14])
-            D1 = D1 ^ self.F(D2, self._k[15])
-            D2 = D2 ^ self.F(D1, self._k[16])
-            D1 = D1 ^ self.F(D2, self._k[17])
-            D1 = self.FL(D1, self._ke[4])  # FL
-            D2 = self.FLINV(D2, self._ke[5])  # FLINV
-            D2 = D2 ^ self.F(D1, self._k[18])
-            D1 = D1 ^ self.F(D2, self._k[19])
-            D2 = D2 ^ self.F(D1, self._k[20])
-            D1 = D1 ^ self.F(D2, self._k[21])
-            D2 = D2 ^ self.F(D1, self._k[22])
-            D1 = D1 ^ self.F(D2, self._k[23])
-            D2 = D2 ^ self._kw[2]  # Финальное забеливание
-            D1 = D1 ^ self._kw[3]
-            C = (D2 << 64) | D1
+        D2 = D2 ^ self.F(D1, self._k[0]) & MASK64
+        D1 = D1 ^ self.F(D2, self._k[1]) & MASK64
+        D2 = D2 ^ self.F(D1, self._k[2]) & MASK64
+        D1 = D1 ^ self.F(D2, self._k[3]) & MASK64
+        D2 = D2 ^ self.F(D1, self._k[4]) & MASK64
+        D1 = D1 ^ self.F(D2, self._k[5]) & MASK64
 
-        return C.to_bytes(self._key_size, byteorder='little')
+        D1 = self.FL(D1, self._ke[0]) & MASK64  # FL
+        D2 = self.FLINV(D2, self._ke[1]) & MASK64  # FLINV
+
+        D2 = D2 ^ self.F(D1, self._k[6]) & MASK64
+        D1 = D1 ^ self.F(D2, self._k[7]) & MASK64
+        D2 = D2 ^ self.F(D1, self._k[8]) & MASK64
+        D1 = D1 ^ self.F(D2, self._k[9]) & MASK64
+        D2 = D2 ^ self.F(D1, self._k[10]) & MASK64
+        D1 = D1 ^ self.F(D2, self._k[11]) & MASK64
+
+        D1 = self.FL(D1, self._ke[2]) & MASK64  # FL
+        D2 = self.FLINV(D2, self._ke[3]) & MASK64  # FLINV
+
+        D2 = D2 ^ self.F(D1, self._k[12]) & MASK64
+        D1 = D1 ^ self.F(D2, self._k[13]) & MASK64
+        D2 = D2 ^ self.F(D1, self._k[14]) & MASK64
+        D1 = D1 ^ self.F(D2, self._k[15]) & MASK64
+        D2 = D2 ^ self.F(D1, self._k[16]) & MASK64
+        D1 = D1 ^ self.F(D2, self._k[17]) & MASK64
+
+        if self._key_size != 16:
+            D1 = self.FL(D1, self._ke[4]) & MASK64  # FL
+            D2 = self.FLINV(D2, self._ke[5]) & MASK64  # FLINV
+
+            D2 = D2 ^ self.F(D1, self._k[18]) & MASK64
+            D1 = D1 ^ self.F(D2, self._k[19]) & MASK64
+            D2 = D2 ^ self.F(D1, self._k[20]) & MASK64
+            D1 = D1 ^ self.F(D2, self._k[21]) & MASK64
+            D2 = D2 ^ self.F(D1, self._k[22]) & MASK64
+            D1 = D1 ^ self.F(D2, self._k[23]) & MASK64
+
+        D2 = D2 ^ self._kw[2] & MASK64  # Финальное забеливание
+        D1 = D1 ^ self._kw[3] & MASK64
+
+        C = ((D2 << 64) | D1) & MASK128
+
+        return C.to_bytes(self._key_size, byteorder='little')[:16]
 
     def _split_key(self, key):
         if self._key_size == 16:
@@ -334,7 +241,6 @@ class Camellia:
 
     def shift(self, num, shift, num_size):
         shift %= num_size
-
         return ((num << shift) | (num >> (num_size - shift))) & ((1 << num_size) - 1)
 
     # Вспомогательные функции
@@ -354,14 +260,14 @@ class Camellia:
         t6 = (x >> 16) & MASK8
         t7 = (x >> 8) & MASK8
         t8 = x & MASK8
-        t1 = SBOX1[t1]
-        t2 = self.shift(SBOX1[t2], 1, 8)
-        t3 = self.shift(SBOX1[t3], 7, 8)
-        t4 = SBOX1[self.shift(t4, 1, 8)]
-        t5 = self.shift(SBOX1[t5], 1, 8)
-        t6 = self.shift(SBOX1[t6], 7, 8)
-        t7 = SBOX1[self.shift(t7, 1, 8)]
-        t8 = SBOX1[t8]
+        t1 = SBOX1[t1] & MASK8
+        t2 = self.shift(SBOX1[t2], 1, 8) & MASK8
+        t3 = self.shift(SBOX1[t3], 7, 8) & MASK8
+        t4 = SBOX1[self.shift(t4, 1, 8)] & MASK8
+        t5 = self.shift(SBOX1[t5], 1, 8) & MASK8
+        t6 = self.shift(SBOX1[t6], 7, 8) & MASK8
+        t7 = SBOX1[self.shift(t7, 1, 8)] & MASK8
+        t8 = SBOX1[t8] & MASK8
         y1 = t1 ^ t3 ^ t4 ^ t6 ^ t7 ^ t8
         y2 = t1 ^ t2 ^ t4 ^ t5 ^ t7 ^ t8
         y3 = t1 ^ t2 ^ t3 ^ t5 ^ t6 ^ t8
@@ -370,7 +276,8 @@ class Camellia:
         y6 = t2 ^ t3 ^ t5 ^ t7 ^ t8
         y7 = t3 ^ t4 ^ t5 ^ t6 ^ t8
         y8 = t1 ^ t4 ^ t5 ^ t6 ^ t7
-        F_OUT = (y1 << 56) | (y2 << 48) | (y3 << 40) | (y4 << 32) | (y5 << 24) | (y6 << 16) | (y7 << 8) | y8
+        F_OUT = (y1 << 56) | (y2 << 48) | (y3 << 40) | (
+                y4 << 32) | (y5 << 24) | (y6 << 16) | (y7 << 8) | y8
 
         return F_OUT
 
@@ -406,6 +313,11 @@ class Camellia:
         return FLINV_OUT
 
 
+def xor_bytes(a, b, size):
+    return (int.from_bytes(a, byteorder='little') ^ int.from_bytes(b, byteorder='little')) \
+        .to_bytes(size, byteorder='little')
+
+
 class ECB:
     def __init__(self, camellia):
         self.camellia = camellia
@@ -421,7 +333,7 @@ class ECB:
         blocks = [b_arr[i: i + self.bs] for i in range(0, len(b_arr), self.bs)]
 
         for block in blocks:
-            yield self.camellia.decode_block(block)
+            yield self.camellia.encode_block(block)
 
 
 class CBC:
@@ -443,7 +355,7 @@ class CBC:
         prev = self.c0
 
         for block in blocks:
-            yield xor_bytes(self.camellia.decode_block(block), prev, self.bs)
+            yield xor_bytes(self.camellia.encode_block(block), prev, self.bs)
             prev = block
 
 
@@ -486,8 +398,3 @@ class CFB:
         for block in blocks:
             yield xor_bytes(self.camellia.encode_block(prev), block, self.bs)
             prev = block
-
-
-def xor_bytes(a, b, size):
-    return (int.from_bytes(a, byteorder='little') ^ int.from_bytes(b, byteorder='little'))\
-        .to_bytes(size, byteorder='little')

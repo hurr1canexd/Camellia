@@ -94,4 +94,4 @@ def camellia_cipher():
 
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.run()
